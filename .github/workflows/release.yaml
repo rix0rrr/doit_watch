@@ -1,0 +1,30 @@
+name: Build and publish python package
+
+on:
+  release:
+    types: [ published ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+      - name: Install venv
+        run: poetry install
+      - name: Test
+        run: poetry run pytest
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Publish PyPI package
+        uses: code-specialist/pypi-poetry-publish@v1.2
+        with:
+          ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUBLISH_REGISTRY_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+          BRANCH: main
+          PACKAGE_DIRECTORY: doit_watch/
