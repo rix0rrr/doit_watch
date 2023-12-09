@@ -36,9 +36,9 @@ watch = "doit_watch:Watch"
 
 ## Credits
 
-I didn't write this plugin myself. I took the source code of the
+I didn't write this plugin myself. This is a fork of the
 [doit-auto1](https://github.com/pydoit/doit-auto1) plugin, and
-combined the [PR](https://github.com/pydoit/doit-auto1/pull/1) of
+I applied the [PR](https://github.com/pydoit/doit-auto1/pull/1) of
 @bollwyvl and the [PR](https://github.com/pydoit/doit-auto1/pull/2) of
 @jguillon into a new package, with the name that we all agree the
 command should have.
