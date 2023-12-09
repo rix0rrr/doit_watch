@@ -101,6 +101,29 @@ class Watch(DoitCmdBase):
         started = time.time()
 
         # execute tasks using Run Command
+        result, arun = self.run_tasks(params, args)
+
+        # get list of files to watch on file system
+        watch_files = self._find_file_deps(arun.control.tasks,
+                                           arun.control.selected_tasks)
+
+        print(f'-> Watching {len(watch_files)} files for changes...')
+
+        # Check for timestamp changes since run started,
+        # if change, restart straight away
+        if not self._dep_changed(watch_files, started, arun.control.targets):
+            # set event handler. just terminate process.
+            class DoitAutoRun(FileModifyWatcher):
+                def handle_event(self, event):
+                    # print("FS EVENT -> {}".format(event))
+                    sys.exit(result)
+            file_watcher = DoitAutoRun(watch_files)
+            # kick start watching process
+            file_watcher.loop()
+
+
+    def run_tasks(self, params, args):
+        # execute tasks using Run Command
         arun = Run(task_loader=self.loader)
         params.add_defaults(CmdParse(arun.get_options()).parse([])[0])
         try:
@@ -115,21 +138,8 @@ class Watch(DoitCmdBase):
                            params.pop('success_callback', None),
                            params.pop('failure_callback', None))
 
-        # get list of files to watch on file system
-        watch_files = self._find_file_deps(arun.control.tasks,
-                                           arun.control.selected_tasks)
+        return result, arun
 
-        # Check for timestamp changes since run started,
-        # if change, restart straight away
-        if not self._dep_changed(watch_files, started, arun.control.targets):
-            # set event handler. just terminate process.
-            class DoitAutoRun(FileModifyWatcher):
-                def handle_event(self, event):
-                    # print("FS EVENT -> {}".format(event))
-                    sys.exit(result)
-            file_watcher = DoitAutoRun(watch_files)
-            # kick start watching process
-            file_watcher.loop()
 
 
     def execute(self, params, args):
